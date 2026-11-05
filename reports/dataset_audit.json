@@ -1,0 +1,182 @@
+{
+  "num_classes": 10,
+  "class_names": [
+    "T-shirt/top",
+    "Trouser",
+    "Pullover",
+    "Dress",
+    "Coat",
+    "Sandal",
+    "Shirt",
+    "Sneaker",
+    "Bag",
+    "Ankle boot"
+  ],
+  "image_shape": [
+    28,
+    28,
+    1
+  ],
+  "splits": {
+    "entrenamiento": {
+      "n_samples": 54000,
+      "n_images": 54000,
+      "image_shape": [
+        28,
+        28,
+        1
+      ],
+      "dtype": "float32",
+      "value_min": 0.0,
+      "value_max": 1.0,
+      "value_mean": 0.28574,
+      "class_counts": {
+        "T-shirt/top": 5370,
+        "Trouser": 5416,
+        "Pullover": 5398,
+        "Dress": 5395,
+        "Coat": 5367,
+        "Sandal": 5409,
+        "Shirt": 5435,
+        "Sneaker": 5445,
+        "Bag": 5384,
+        "Ankle boot": 5381
+      },
+      "class_share_pct": {
+        "T-shirt/top": 9.944,
+        "Trouser": 10.03,
+        "Pullover": 9.996,
+        "Dress": 9.991,
+        "Coat": 9.939,
+        "Sandal": 10.017,
+        "Shirt": 10.065,
+        "Sneaker": 10.083,
+        "Bag": 9.97,
+        "Ankle boot": 9.965
+      },
+      "class_count_min": 5367,
+      "class_count_max": 5445,
+      "imbalance_ratio_max_over_min": 1.0145
+    },
+    "validacion": {
+      "n_samples": 6000,
+      "n_images": 6000,
+      "image_shape": [
+        28,
+        28,
+        1
+      ],
+      "dtype": "float32",
+      "value_min": 0.0,
+      "value_max": 1.0,
+      "value_mean": 0.288746,
+      "class_counts": {
+        "T-shirt/top": 630,
+        "Trouser": 584,
+        "Pullover": 602,
+        "Dress": 605,
+        "Coat": 633,
+        "Sandal": 591,
+        "Shirt": 565,
+        "Sneaker": 555,
+        "Bag": 616,
+        "Ankle boot": 619
+      },
+      "class_share_pct": {
+        "T-shirt/top": 10.5,
+        "Trouser": 9.733,
+        "Pullover": 10.033,
+        "Dress": 10.083,
+        "Coat": 10.55,
+        "Sandal": 9.85,
+        "Shirt": 9.417,
+        "Sneaker": 9.25,
+        "Bag": 10.267,
+        "Ankle boot": 10.317
+      },
+      "class_count_min": 555,
+      "class_count_max": 633,
+      "imbalance_ratio_max_over_min": 1.1405
+    },
+    "prueba": {
+      "n_samples": 10000,
+      "n_images": 10000,
+      "image_shape": [
+        28,
+        28,
+        1
+      ],
+      "dtype": "float32",
+      "value_min": 0.0,
+      "value_max": 1.0,
+      "value_mean": 0.286849,
+      "class_counts": {
+        "T-shirt/top": 1000,
+        "Trouser": 1000,
+        "Pullover": 1000,
+        "Dress": 1000,
+        "Coat": 1000,
+        "Sandal": 1000,
+        "Shirt": 1000,
+        "Sneaker": 1000,
+        "Bag": 1000,
+        "Ankle boot": 1000
+      },
+      "class_share_pct": {
+        "T-shirt/top": 10.0,
+        "Trouser": 10.0,
+        "Pullover": 10.0,
+        "Dress": 10.0,
+        "Coat": 10.0,
+        "Sandal": 10.0,
+        "Shirt": 10.0,
+        "Sneaker": 10.0,
+        "Bag": 10.0,
+        "Ankle boot": 10.0
+      },
+      "class_count_min": 1000,
+      "class_count_max": 1000,
+      "imbalance_ratio_max_over_min": 1.0
+    },
+    "entrenamiento_completo": {
+      "n_samples": 60000,
+      "n_images": 60000,
+      "image_shape": [
+        28,
+        28,
+        1
+      ],
+      "dtype": "float32",
+      "value_min": 0.0,
+      "value_max": 1.0,
+      "value_mean": 0.286041,
+      "class_counts": {
+        "T-shirt/top": 6000,
+        "Trouser": 6000,
+        "Pullover": 6000,
+        "Dress": 6000,
+        "Coat": 6000,
+        "Sandal": 6000,
+        "Shirt": 6000,
+        "Sneaker": 6000,
+        "Bag": 6000,
+        "Ankle boot": 6000
+      },
+      "class_share_pct": {
+        "T-shirt/top": 10.0,
+        "Trouser": 10.0,
+        "Pullover": 10.0,
+        "Dress": 10.0,
+        "Coat": 10.0,
+        "Sandal": 10.0,
+        "Shirt": 10.0,
+        "Sneaker": 10.0,
+        "Bag": 10.0,
+        "Ankle boot": 10.0
+      },
+      "class_count_min": 6000,
+      "class_count_max": 6000,
+      "imbalance_ratio_max_over_min": 1.0
+    }
+  }
+}

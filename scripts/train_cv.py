@@ -1,84 +1,59 @@
+"""Entrena el baseline denso y la CNN con la misma particion y semilla.
+
+Uso (manual LAB07):
+    uv run python scripts/train_cv.py --epochs 8
+
+Salidas:
+    reports/cv_metrics.json        metricas globales, por clase e historiales
+    reports/cv_per_class.csv        precision, recall, F1 y soporte por clase
+    reports/cv_errors_by_class.csv  errores, falsos positivos y recall por clase
+    reports/dataset_audit.json      auditoria del dataset y reparto por clase
+    reports/training_curves.png     curvas de entrenamiento y validacion
+    reports/confusion_cnn.png       matriz de confusion de la CNN
+    reports/confusion_dense.png     matriz de confusion del baseline denso
+    reports/cnn_errors.png          ejemplos de error de la CNN (semilla fija)
+    reports/errors_by_class.png     recall y errores por clase
+    reports/cnn_error_samples.csv   ficha de los ejemplos de error elegidos
+    models/best_dense.keras         baseline denso entrenado
+    models/best_cnn.keras           CNN entrenada
+"""
+
 from __future__ import annotations
 
 import argparse
 import json
-import os
-import random
 from pathlib import Path
-from time import perf_counter
 
-import matplotlib.pyplot as plt
-import numpy as np
-import tensorflow as tf
-from sklearn.metrics import ConfusionMatrixDisplay, classification_report, f1_score
-
-from inf8239_u02_cv.data import normalize_images, validate_images
-from inf8239_u02_cv.models import build_cnn, build_dense
+from inf8239_u02_cv.experiment import run_experiment
 
 ROOT = Path(__file__).resolve().parents[1]
-SEED = 42
-os.environ.setdefault("TF_DETERMINISTIC_OPS", "1")
-random.seed(SEED)
-np.random.seed(SEED)
-tf.random.set_seed(SEED)
-
-
-def compile_model(model):
-    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
-    return model
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", type=int, default=8)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--epochs", type=int, default=8, help="epocas maxima por modelo")
+    parser.add_argument("--seed", type=int, default=42, help="semilla de Python, NumPy y TensorFlow")
+    parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--repeats", type=int, default=3, help="repeticiones de la medicion de inferencia")
+    parser.add_argument("--reports-dir", type=Path, default=ROOT / "reports")
+    parser.add_argument("--models-dir", type=Path, default=ROOT / "models")
+    parser.add_argument("--quiet", action="store_true", help="silencia el log de epochs de Keras")
     args = parser.parse_args()
-    reports = ROOT / "reports"
-    models_dir = ROOT / "models"
-    reports.mkdir(exist_ok=True)
-    models_dir.mkdir(exist_ok=True)
-    (x_train_all, y_train_all), (x_test, y_test) = tf.keras.datasets.fashion_mnist.load_data()
-    x_train_all = normalize_images(x_train_all)
-    x_test = normalize_images(x_test)
-    x_train, y_train = x_train_all[:-6000], y_train_all[:-6000]
-    x_valid, y_valid = x_train_all[-6000:], y_train_all[-6000:]
-    validate_images(x_train, y_train)
-    validate_images(x_test, y_test)
-    metrics = {}
-    trained = {}
-    for name, factory in {"dense": build_dense, "cnn": build_cnn}.items():
-        model = compile_model(factory(tf))
-        callbacks = [tf.keras.callbacks.EarlyStopping(patience=2, restore_best_weights=True)]
-        if name == "cnn":
-            callbacks.append(tf.keras.callbacks.ModelCheckpoint(models_dir / "best_cnn.keras", save_best_only=True))
-        start = perf_counter()
-        model.fit(x_train, y_train, validation_data=(x_valid, y_valid), epochs=args.epochs,
-                  batch_size=128, callbacks=callbacks, verbose=2)
-        train_seconds = perf_counter() - start
-        start = perf_counter()
-        probabilities = model.predict(x_test, verbose=0)
-        inference_seconds = perf_counter() - start
-        predictions = probabilities.argmax(axis=1)
-        metrics[name] = {
-            "f1_macro": float(f1_score(y_test, predictions, average="macro")),
-            "parameters": int(model.count_params()),
-            "train_seconds": train_seconds,
-            "inference_ms_per_image": 1000 * inference_seconds / len(x_test),
-        }
-        trained[name] = (model, predictions)
-        print(name, json.dumps(metrics[name], indent=2))
-    _, predictions = trained["cnn"]
-    print(classification_report(y_test, predictions, digits=3))
-    ConfusionMatrixDisplay.from_predictions(y_test, predictions, cmap="Blues")
-    plt.savefig(reports / "confusion_cnn.png", dpi=170, bbox_inches="tight")
-    wrong = np.where(predictions != y_test)[0][:16]
-    figure, axes = plt.subplots(4, 4, figsize=(8, 8))
-    for axis, index in zip(axes.ravel(), wrong):
-        axis.imshow(x_test[index].squeeze(), cmap="gray")
-        axis.set_title(f"R:{y_test[index]} P:{predictions[index]}")
-        axis.axis("off")
-    figure.tight_layout()
-    figure.savefig(reports / "cnn_errors.png", dpi=170)
-    (reports / "cv_metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
+
+    payload = run_experiment(
+        epochs=args.epochs,
+        seed=args.seed,
+        batch_size=args.batch_size,
+        repeats=args.repeats,
+        reports_dir=args.reports_dir,
+        models_dir=args.models_dir,
+        verbose=0 if args.quiet else 2,
+    )
+
+    print("\nResumen comparativo (misma particion, misma semilla):")
+    print(json.dumps(payload["summary"], indent=2))
+    print("\nClassification report de la CNN:")
+    print(payload["cnn"]["classification_report"])
 
 
 if __name__ == "__main__":
