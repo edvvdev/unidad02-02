@@ -68,7 +68,7 @@ determinaron el resultado:
 5. *"Si tardara más de 25 minutos, reduce a `--epochs 5` y decláralo en el README, el
    PDF y la Model Card (no inventes métricas de 8 épocas si no las ejecutaste)."*
    → No hizo falta reducir: en esta máquina (CPU, 20 núcleos) las 8 épocas tardan
-   12,4 s (denso) y 62,4 s (CNN). Las cifras publicadas son las de
+12.2 s (denso) y 68.9 s (CNN). Las cifras publicadas son las de
    la ejecución real de 8 épocas.
 
 6. *"Elige errores al azar con semilla fija"* (apartado LAB07 del índice de la unidad).
@@ -94,44 +94,34 @@ determinaron el resultado:
 
 ## 4. Partes verificadas por el estudiante
 
-- [x] **Auditoría del dataset antes de entrenar:** formas (60.000 / 10.000 imágenes de
-      28×28), tipo `uint8`, rango 0–255 y reparto por clase de las tres particiones
-      quedan registrados en `reports/dataset_audit.json`.
-- [x] **Partición reproducible:** dos particiones consecutivas dan exactamente el
-      mismo conjunto de validación; la validación son las últimas 6.000 filas del
-      bloque de entrenamiento (`tests/test_experiment_contract.py`).
-- [x] **Sin fuga de datos:** las 10.000 imágenes de prueba no entran en el
-      entrenamiento ni en la selección de modelos; el estudio de presupuesto usa
-      validación para las curvas por época.
-- [x] **Coherencia de la matriz de confusión:** sus filas suman el soporte de cada
-      clase (1.000) y su total son 10.000 (`tests/test_experiment_contract.py`).
-- [x] **Coherencia entre artefactos:** `cv_per_class.csv` coincide con el bloque
-      `per_class` de `cv_metrics.json`, y `cv_errors_by_class.csv` coincide con la
-      matriz de confusión.
-- [x] **Inferencia repetida:** tres mediciones por modelo y mediana usada en todas las
-      tablas; la mediana del JSON coincide con la mediana de las mediciones.
-- [x] **Tamaño del modelo:** medido sobre los archivos `.keras` realmente guardados
-      (`models/best_dense.keras`, `models/best_cnn.keras`), no estimado.
-- [x] **Curvas leídas época a época:** se comprobó qué patrón del manual se observa
-      en cada modelo (aprendizaje útil en el denso, subajuste en la CNN).
-- [x] **Errores visualmente revisados:** los 16 ejemplos de `reports/cnn_errors.png` se
-      examinaron uno a uno (clase real, clase predicha y forma de la prenda) y se
-      clasificaron en los pares de ambigüedad descritos en el notebook y en el PDF.
-- [x] **Notebook ejecutado de principio a fin:** 23 celdas de código, todas con
-      `execution_count`, **0 celdas con error** y 6 figuras embebidas
-      (`tests/test_notebook_contract.py`).
-- [x] **Pruebas:** `uv run pytest -q` → 29 pruebas en verde.
-- [x] **Linter:** `uv run ruff check .` → sin incidencias (incluye el notebook).
-- [x] **PDF breve:** 6 páginas, con «Estudiante: Edwing Perez» y el enlace al
-      repositorio, sin correo institucional ni número de matrícula.
-- [x] **Clon limpio:** `git clone` del repositorio publicado y `bash scripts/run_all.sh`
-      completo sin errores; el PDF y `reports/` se regeneran.
-- [x] **Cifras publicadas:** `uv run python scripts/verify_cifras.py` contrasta el
-      README, la Model Card y el PDF contra `reports/`.
+Cada comprobación va con el comando que la ejecuta y con la **salida real** de la
+última ejecución (2026-11-05, CPU, sin GPU detectada).
+
+| # | Comprobación | Comando | Salida real |
+|---|---|---|---|
+| 1 | Auditoría del dataset antes de entrenar: formas (60.000 / 10.000 imágenes de 28×28), tipo `uint8`, rango 0–255 y reparto por clase de las tres particiones | `uv run python scripts/train_cv.py --epochs 8` | `reports/dataset_audit.json` generado con las tres particiones auditadas |
+| 2 | Partición reproducible: dos particiones consecutivas dan exactamente el mismo conjunto de validación (las últimas 6.000 filas del bloque de entrenamiento) | `uv run pytest -q tests/test_experiment_contract.py` | `2 passed` (pruebas de partición determinista y sin fuga) |
+| 3 | Sin fuga de datos: las 10.000 imágenes de prueba no entran en el entrenamiento ni en la selección de modelos | `uv run pytest -q tests/test_experiment_contract.py` | `2 passed`; el estudio de presupuesto calcula las curvas por época sobre **validación** |
+| 4 | Coherencia de la matriz de confusión: sus filas suman el soporte de cada clase (1.000) y su total son 10.000 | `uv run pytest -q tests/test_experiment_contract.py` | `2 passed` |
+| 5 | Coherencia entre artefactos: `cv_per_class.csv` coincide con el bloque `per_class` de `cv_metrics.json` y `cv_errors_by_class.csv` con la matriz de confusión | `uv run pytest -q tests/test_experiment_contract.py` | `2 passed` |
+| 6 | Inferencia repetida: tres mediciones por modelo y mediana usada en todas las tablas | `uv run python scripts/train_cv.py --epochs 8` | `inference_ms_per_image_runs` con 3 valores por modelo en `reports/cv_metrics.json` |
+| 7 | Tamaño del modelo medido sobre los archivos `.keras` realmente guardados | `uv run python scripts/train_cv.py --epochs 8` | `619.12 KB` (denso) y `262.17 KB` (CNN) en `reports/cv_metrics.json` |
+| 8 | Curvas leídas época a época: qué patrón del manual se observa en cada modelo | `uv run python -c "from inf8239_u02_cv.diagnostico import diagnostico_curvas"` | `dense → aprendizaje_util`; `cnn → subajuste` (la val_loss baja de 1,0882 a 0,5872 y la accuracy de validación sube de 0,6737 a 0,7995) |
+| 9 | El patrón publicado en el PDF coincide con el del notebook y con la Model Card | `uv run python scripts/verify_cifras.py` | `OK: todas las cifras publicadas coinciden con reports/` (el verificador recalcula el patrón y rechaza la frase invertida) |
+| 10 | Errores visualmente revisados: los 16 ejemplos de `reports/cnn_errors.png`, uno a uno (clase real, clase predicha y forma de la prenda) | `uv run python scripts/train_cv.py --epochs 8` | `reports/cnn_error_samples.csv` con los 16 pares y su interpretación en el notebook y en el PDF |
+| 11 | Notebook ejecutado de principio a fin: 23 celdas de código, todas con `execution_count`, **0 celdas con error** | `uv run python -m jupyter nbconvert --to notebook --execute --inplace notebooks/01_ejercicio04_cnn_model_card.ipynb` | `Writing 1096834 bytes to notebooks/01_ejercicio04_cnn_model_card.ipynb` |
+| 12 | Pruebas | `uv run pytest -q` | `29 passed in 2.45s` |
+| 13 | Linter (incluye el notebook) | `uv run ruff check .` | `All checks passed!` |
+| 14 | PDF breve: 6 páginas, con «Estudiante: Edwing Perez» y el enlace al repositorio, sin correo institucional ni número de matrícula | `pdfinfo docs/EJERCICIO_04_PDF_BRIEF.pdf` | `Pages: 6` |
+| 15 | Cifras publicadas contra `reports/` | `uv run python scripts/verify_cifras.py` | `OK: todas las cifras publicadas coinciden con reports/` |
+| 16 | Pipeline completo desde un clon de GitHub | `bash scripts/run_all.sh` | `Pipeline completo. Artefactos en reports/, models/ y docs/EJERCICIO_04_PDF_BRIEF.pdf` (9/9 pasos sin errores) |
+| 17 | Entorno de ejecución (la ausencia de GPU es una limitación del entorno, no del modelo) | `uv run python scripts/check_runtime.py` | `GPU: []` |
+
+Pendientes (fuera del alcance del laboratorio y declarados como tales en la Model Card):
+
 - [ ] **Pendiente:** repetir la medición de inferencia en un equipo con GPU, para
       separar el coste del modelo del coste de esta máquina sin GPU.
-- [ ] **Pendiente:** auditoría de equidad por subclase y pruebas de robustez; quedan
-      fuera del alcance del laboratorio y están declaradas como tales en la Model Card.
+- [ ] **Pendiente:** auditoría de equidad por subclase y pruebas de robustez.
 - [ ] **Pendiente:** reevaluación en otro dominio (imágenes médicas, OCR), que exige
       reentrenar desde cero con datos de ese dominio.
 
@@ -152,6 +142,13 @@ determinaron el resultado:
 | 11 | El PDF tenía 8 páginas y el máximo permitido son 6 | `pdfinfo` sobre `docs/EJERCICIO_04_PDF_BRIEF.pdf` |
 | 12 | Las figuras del PDF se escalaban con una proporción fija (0,62), lo que deformaba la rejilla de errores | Lectura del PDF renderizado; se pasó a leer la proporción real de la cabecera PNG |
 | 13 | **La CNN quedaba en subajuste con 8 épocas**: su pérdida de validación seguía bajando en la última época y su accuracy de validación no se había estabilizado | Lectura de `reports/training_curves.png` y de los historiales del JSON; se añadió el estudio complementario de presupuesto (`scripts/budget_study.py`) para separar el efecto del entrenamiento del efecto de la arquitectura |
+| 14 | El PDF publicaba un **diagnóstico de curvas invertido**: `val_loss[-1] > min(val_loss)` detecta sobreajuste, pero se usaba para decidir el subajuste, y el informe afirmaba «la pérdida de validación deja de mejorar, con lo que hay que revisar la regularización» mientras la curva embebida en esa misma página describía lo contrario | Contraste entre el texto del PDF y la figura, el notebook (celda 2.1) y la Model Card |
+| 15 | El PDF no incluía `reports/confusion_dense.png` (la evidencia que sustenta la decisión central) ni `reports/budget_study.png` | Revisión de las figuras del entregable frente a las de `reports/` |
+| 16 | Sobreafirmación en el PDF §5: «la diferencia no es solo de presupuesto: la arquitectura mínima del base … queda por debajo de una capa densa de 784 entradas en este dataset» | Con **una sola semilla y sin intervalos** la afirmación no queda demostrada; se reescribió en el sentido prudente de `reports/decision_tecnica.txt` y se alinearon el README y la Model Card |
+| 17 | En `reports/errors_by_class.png` la leyenda tapaba el extremo de la barra de **Sandal** (recall 0,962) y en `reports/budget_study.png` rozaba la barra de la CNN | Revisión visual de las figuras renderizadas |
+| 18 | Erratas del README («deShopping», «a escala de grises», «Ambas Curve descienden») y `reports/budget_study.png` ausente del árbol de `reports/` | Lectura del README y contraste con el contenido real de `reports/` |
+| 19 | `scripts/verify_cifras.py` solo validaba cifras **numéricas**, por eso el defecto 14 pudo llegar al PDF | Se amplió el verificador: recalcula el patrón de las curvas, comprueba la frase de subajuste en el PDF, el README y la Model Card, y rechaza explícitamente la frase invertida y la sobreafirmación |
+| 20 | `AI_USE_DECLARATION.md` marcaba las casillas de verificación sin el comando ni la salida real | Cada comprobación de la sección 4 lleva ahora su comando y su salida real |
 
 ## 6. Límites del uso de IA y responsabilidad del estudiante
 

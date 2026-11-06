@@ -23,8 +23,8 @@ Todas las cifras proceden de `reports/cv_metrics.json`, `reports/cv_per_class.cs
 | Semilla | 42 (Python, NumPy y TensorFlow) | 42 |
 
 **Modelo entregado: **baseline denso**.** La CNN se conserva como alternativa documentada
-por su huella (19466 parámetros y 262.17 KB frente a 50890 y
-619.12 KB del denso): es la opción preferente si la restricción dominante es la
+por su huella (19466 parámetros y 262.17 KB frente a
+50890 y 619.12 KB del denso): es la opción preferente si la restricción dominante es la
 memoria o el tamaño del artefacto desplegado. El razonamiento completo está en
 `reports/decision_tecnica.txt` y en el apartado 8 del notebook.
 
@@ -144,20 +144,26 @@ distingue, la imagen es genuinamente ambigua. El detalle completo está en
 |---|---|---|
 | Parámetros entrenables | 50890 | 19466 |
 | Tamaño del modelo (`.keras`) | 619.12 KB | 262.17 KB |
-| Tiempo de entrenamiento (8 épocas) | 12.4 s | 62.4 s |
-| Tiempo de inferencia (mediana de 3) | 0.0379 ms/imagen | 0.0899 ms/imagen |
-| Mediciones de inferencia | 0.0575, 0.0293, 0.0379 ms/imagen | 0.0899, 0.0779, 0.1062 ms/imagen |
+| Tiempo de entrenamiento (8 épocas) | 12.2 s | 68.9 s |
+| Tiempo de inferencia (mediana de 3) | 0.0512 ms/imagen | 0.0823 ms/imagen |
+| Mediciones de inferencia | 0.0512, 0.0446, 0.0622 ms/imagen | 0.0946, 0.0786, 0.0823 ms/imagen |
 
 * **Estudio complementario de presupuesto** (misma partición y misma semilla,
   25 épocas): el denso alcanza F1 macro 0.8761 en
-  37.2 s y la CNN 0.8439 en 177.4 s. Es un
+  32.0 s y la CNN 0.8439 en 215.3 s. Es un
   experimento **complementario**: la comparación oficial del laboratorio sigue siendo
   la de 8 épocas y su resultado se reporta sin modificar.
+* **Alcance de la comparación.** El resultado es **compatible con una mejora de la
+  arquitectura de la CNN al entrenar con más cómputo**, pero con **una sola semilla y
+  sin intervalos de confianza** no permite separar de forma concluyente el efecto del
+  presupuesto del efecto de la arquitectura. La decisión de entrega se apoya en las
+  medidas de la ejecución de referencia (8 épocas), donde la comparación sí es
+  concluyente.
 * **Conclusión Green AI.** La CNN es más compacta (62 % menos parámetros y 58 % menos
   disco) pero, con este dataset, este presupuesto y esta arquitectura, **no aporta
   ninguna mejora predictiva**: el baseline denso gana en F1 macro
-  (0.8647 frente a 0.7892), entrena 5.0 veces más rápido e
-  infiere 2.4 veces más rápido. Una mejora que no existe no justifica el
+  (0.8647 frente a 0.7892), entrena 5.6 veces más rápido e
+  infiere 1.6 veces más rápido. Una mejora que no existe no justifica el
   coste adicional, de modo que **se entrega el baseline denso** y la CNN queda
   documentada para entornos con restricción de memoria.
 

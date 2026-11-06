@@ -34,7 +34,8 @@ inreproducible. `scripts/run_all.sh` y `scripts/run_all.ps1` ya lo hacen en el p
 | `scripts/budget_study.py` | Estudio **complementario** de presupuesto de entrenamiento (25 épocas, misma partición y misma semilla) con F1 macro de validación por época. Responde a la pregunta que dejan abiertas las curvas del experimento principal. |
 | `scripts/make_notebook.py` | Genera el esqueleto de `notebooks/01_ejercicio04_cnn_model_card.ipynb` a partir de celdas escritas en el propio script: el notebook es reproducible y no depende de copiar y pegar a mano. |
 | `scripts/build_ejercicio04_pdf.py` | Genera `docs/EJERCICIO_04_PDF_BRIEF.pdf` (6 páginas) leyendo **todas** las cifras de `reports/`. El enlace al repositorio se toma de `REPO_URL`. |
-| `scripts/verify_cifras.py` | Comprueba automáticamente que las cifras publicadas en el README, en la Model Card y en el PDF coinciden con `reports/`, que el PDF tiene entre 4 y 6 páginas y que el notebook no tiene celdas con error. |
+| `src/inf8239_u02_cv/diagnostico.py` | Diagnóstico **compartido** del patrón de las curvas (aprendizaje útil / sobreajuste / subajuste). Lo usan el notebook, el generador del PDF y `scripts/verify_cifras.py`, de modo que los tres leen exactamente el mismo criterio y no pueden divergir entre sí. |
+| `scripts/verify_cifras.py` | Comprueba automáticamente que las cifras publicadas en el README, en la Model Card y en el PDF coinciden con `reports/`, que el PDF tiene entre 4 y 6 páginas, que el notebook no tiene celdas con error, **que el patrón de las curvas es el que corresponde** (recalculado con `diagnostico.py`) y **que el PDF no publica frases incorrectas o sobreafirmadas**. |
 | `scripts/run_all.sh` | Pipeline completo en Linux/macOS: entorno → `check_runtime` → entrenamiento → estudio de presupuesto → notebook → PDF → pruebas → verificación de cifras. |
 | `scripts/run_all.ps1` | Equivalente para Windows PowerShell. |
 | `notebooks/01_ejercicio04_cnn_model_card.ipynb` | Notebook **ejecutado** (23 celdas de código, 0 errores, 6 figuras): auditoría → partición → entrenamiento → curvas → métricas globales y por clase → matriz de confusión → errores por clase y ejemplos visuales → costo y tamaño → decisión técnica → cierre interpretativo. |
@@ -70,7 +71,22 @@ inreproducible. `scripts/run_all.sh` y `scripts/run_all.ps1` ya lo hacen en el p
 | Modelo entregado | El base solo guardaba la CNN, sin decidir nada | **Baseline denso** (decidido por los datos, no fijado de antemano) | Con 8 épocas el denso alcanza F1 macro 0.8647 frente a 0.7892 de la CNN, entrena 5.0 veces más rápido e infiere 2.4 veces más rápido; la CNN solo gana en huella. La decisión se calcula en el notebook y se escribe en `reports/decision_tecnica.txt` |
 |Experimento adicional | Ninguno | Estudio de presupuesto con 25 épocas (`scripts/budget_study.py`) | Las curvas del experimento principal mostraron que la CNN queda en **subajuste**; el estudio separa el efecto del presupuesto de entrenamiento del efecto de la arquitectura. Es **complementario**: la comparación oficial sigue siendo la de 8 épocas y se reporta sin modificar |
 
-## 4. Elementos no incluidos y por qué
+## 4. Segunda ronda de correcciones (2026-11-05)
+
+Correcciones sobre la entrega ya publicada, todas verificadas ejecutando el
+código del repositorio.
+
+| # | Defecto | Corrección | Evidencia |
+|---|---|---|---|
+| 1 | El PDF publicaba un **diagnóstico de curvas invertido**: la condición `val_loss[-1] > min(val_loss)` detecta **sobreajuste**, pero se usaba para decidir el subajuste, de modo que el informe afirmaba «la pérdida de validación deja de mejorar, con lo que hay que revisar la regularización» mientras la curva embebida en esa misma página, el pie de figura, el notebook y la Model Card describían lo contrario | El diagnóstico se centraliza en `src/inf8239_u02_cv/diagnostico.py`, que detecta el subajuste como pretende el manual (pérdida de validación todavía alta **y en descenso**, sin estabilizar). Lo usan el notebook, el PDF y `verify_cifras.py` | `reports/cv_metrics.json`: la val_loss de la CNN baja de 1,0882 a 0,5872 y la accuracy de validación sube de 0,6737 a 0,7995; el patrón recalculado es `subajuste` |
+| 2 | El PDF no incluía dos de las seis figuras: `reports/confusion_dense.png` (la evidencia que sustenta la decisión central) ni `reports/budget_study.png` | Ambas se añaden: las dos matrices de confusión van en paralelo en la sección de evidencia visual y el estudio de presupuesto ocupa su propia sección con su figura | `pdftotext` del PDF regenerado y revisión de las páginas renderizadas |
+| 3 | Sobreafirmación en el PDF §5: «la diferencia no es solo de presupuesto: la arquitectura mínima del base … queda por debajo de una capa densa de 784 entradas en este dataset». Con **una sola semilla y sin intervalos** no queda demostrado | Reescrito en el sentido prudente: «el resultado es **compatible con una mejora de la arquitectura** de la CNN al entrenar con más cómputo, pero con una sola semilla y sin intervalos de confianza **no permite separar de forma concluyente** el efecto del presupuesto del efecto de la arquitectura». El README y la Model Card se alinean con esa frase | `reports/decision_tecnica.txt`, README y `MODEL_CARD.md` |
+| 4 | Erratas del README: «deShopping», «a escala de grises», «Ambas Curve descienden» y `reports/budget_study.png` ausente de la estructura | Corregidas y el archivo añadido al árbol de `reports/` | `README.md` |
+| 5 | Las leyendas tapaban las barras: en `reports/errors_by_class.png` la leyenda se superponía al extremo de la barra de **Sandal** (recall 0,962) y en `reports/budget_study.png` rozaba la barra de la CNN | Las leyendas se salen del área de las barras (`loc="upper center"` con margen superior en las barras y `loc="lower right"` en el panel de curvas, donde las series suben y la esquina queda libre) | Revisión visual de las dos figuras regeneradas |
+| 6 | `scripts/verify_cifras.py` solo validaba cifras **numéricas**, por eso el defecto 1 pudo llegar al PDF | Se amplía: recalcula el patrón de las curvas contra `reports/cv_metrics.json`, comprueba que la frase de subajuste está en el PDF, el README y la Model Card, y rechaza explícitamente la frase invertida y la sobreafirmación. El verificador forma parte de `scripts/run_all.sh` | `uv run python scripts/verify_cifras.py` |
+| 7 | `AI_USE_DECLARATION.md` marcaba las casillas de verificación sin el comando ni la salida real | Cada comprobación va con su comando y su salida real | `AI_USE_DECLARATION.md` |
+
+## 5. Elementos no incluidos y por qué
 
 | Elemento | Motivo |
 |---|---|

@@ -149,18 +149,18 @@ semilla 42, CPU (sin GPU detectada), TensorFlow 2.21.0.
 | Accuracy | 0.8663 | 0.7930 | -0.0733 |
 | Parámetros entrenables | 50890 | 19466 | -31424 |
 | Tamaño del modelo (`.keras`) | 619.12 KB | 262.17 KB | -356.95 KB |
-| Tiempo de entrenamiento | 12.4 s | 62.4 s | +50.0 s |
-| Inferencia (mediana de 3) | 0.0379 ms/img | 0.0899 ms/img | +0.0520 ms/img |
+| Tiempo de entrenamiento | 12.2 s | 68.9 s | +56.7 s |
+| Inferencia (mediana de 3) | 0.0512 ms/img | 0.0823 ms/img | +0.0311 ms/img |
 | Épocas ejecutadas | 8 | 8 | — |
 
 Mediciones individuales de inferencia (ms por imagen):
-denso `0.0575, 0.0293 y 0.0379` → mediana `0.0379`;
-CNN `0.0899, 0.0779 y 0.1062` → mediana `0.0899`.
+denso `0.0512, 0.0446, 0.0622` → mediana `0.0512`;
+CNN `0.0946, 0.0786, 0.0823` → mediana `0.0823`.
 
 ### Lectura de las curvas
 
 * **Baseline denso:** la pérdida de entrenamiento baja de 0.6009 a 0.3132 y la
-  de validación de 0.4510 a 0.3538. Ambas Curve descienden de forma
+  de validación de 0.4510 a 0.3538. Ambas curvas descienden de forma
   sostenida (patrón «el modelo está aprendiendo patrones útiles») y no hay sobreajuste.
 * **CNN:** la pérdida de entrenamiento pasa de 1.5808 a 0.6953 y la de validación
   de 1.0882 a 0.5872; la accuracy de validación sigue en 0.7995 en la
@@ -175,8 +175,15 @@ semilla (curvas por época calculadas sobre validación, nunca sobre prueba):
 
 | Modelo | F1 macro 8 ep. | F1 macro 25 ep. | Tiempo de entrenamiento 25 ep. |
 |---|---|---|---|
-| Baseline denso | 0.8647 | 0.8761 | 37.2 s |
-| CNN | 0.7892 | 0.8439 | 177.4 s |
+| Baseline denso | 0.8647 | 0.8761 | 32.0 s |
+| CNN | 0.7892 | 0.8439 | 215.3 s |
+
+El resultado es **compatible con una mejora de la arquitectura de la CNN al entrenar
+con más cómputo**, pero con **una sola semilla y sin intervalos de confianza** no
+permite separar de forma concluyente el efecto del presupuesto del efecto de la
+arquitectura: por eso la decisión se toma sobre las medidas de la ejecución de
+referencia (8 épocas) y el estudio ampliado se reporta como evidencia
+complementaria.
 
 ### Errores por clase
 
@@ -190,8 +197,8 @@ elegidos **al azar con semilla fija** en `reports/cnn_errors.png`.
 ### Decisión técnica
 
 Se entrega el ****baseline denso****. Con el presupuesto que fija el manual el baseline
-denso gana en F1 macro, entrena 5.0 veces más rápido e infiere
-2.4 veces más rápido; la **única** dimensión en la que gana la CNN es la
+denso gana en F1 macro, entrena 5.6 veces más rápido e infiere
+1.6 veces más rápido; la **única** dimensión en la que gana la CNN es la
 huella (19466 parámetros y 262.17 KB frente a 50890 y 619.12),
 de modo que la CNN es la opción preferente si la restricción dominante es la memoria
 o el tamaño del artefacto desplegado. El razonamiento completo, calculado a partir de
@@ -206,7 +213,7 @@ las métricas de la ejecución, está en `reports/decision_tecnica.txt`.
   resultado **no** demuestra preparación para imágenes médicas, OCR, vigilancia ni
   ningún otro dominio: antes de usar el modelo fuera de esta tarea hay que
   reentrenarlo y reevaluarlo con datos del dominio.
-* Los datos son deShopping en línea a escala de grises; no incluyen color, textura
+* Los datos son de Shopping en línea, en escala de grises; no incluyen color, textura
   real, contexto ni personas, y el modelo hereda esas limitaciones.
 * La ejecución de referencia se hizo **en CPU (sin GPU detectada)**. Los tiempos de
   entrenamiento e inferencia son válidos para esta máquina y **no** deben
@@ -240,6 +247,7 @@ las métricas de la ejecución, está en `reports/decision_tecnica.txt`.
 │   ├── cnn_error_samples.csv      # ficha de los 16 ejemplos de error elegidos
 │   ├── dataset_audit.json         # auditoría del dataset y reparto por clase
 │   ├── budget_study.json          # estudio complementario de presupuesto
+│   ├── budget_study.png           # curvas por época y efecto del presupuesto
 │   ├── decision_tecnica.txt       # decisión técnica calculada sobre las métricas
 │   ├── training_curves.png        # curvas de entrenamiento y validación de ambos modelos
 │   ├── confusion_cnn.png          # matriz de confusión de la CNN
@@ -259,6 +267,7 @@ las métricas de la ejecución, está en `reports/decision_tecnica.txt`.
 │   ├── data.py                    # normalización, partición, auditoría, nombres de clase
 │   ├── models.py                  # build_dense y build_cnn (base, sin cambios)
 │   ├── experiment.py              # experimento reproducible: entrenamiento, métricas, artefactos
+│   ├── diagnostico.py             # patrón de las curvas (compartido por notebook, PDF y verificador)
 │   └── figures.py                 # figuras: curvas, confusión, errores por clase, rejilla de errores
 └── tests/                         # pruebas del contrato de datos, modelos, métricas y notebook
 ```
