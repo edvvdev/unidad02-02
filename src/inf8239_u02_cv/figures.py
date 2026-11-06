@@ -126,10 +126,12 @@ def plot_errors_by_class(rows: list[dict], path: Path) -> Path:
     axes[0].bar(position + width / 2, [row["recall"] for row in cnn], width, label="CNN")
     axes[0].set_title("Recall por clase (conjunto de prueba)")
     axes[0].set_ylabel("recall")
-    axes[0].set_ylim(0, 1.05)
+    # Margen superior para que la leyenda quede por encima de las barras
+    # (la barra mas alta llega a 0,962) y no tape ninguna.
+    axes[0].set_ylim(0, 1.32)
     axes[0].set_xticks(position)
     axes[0].set_xticklabels(names, rotation=45, ha="right", fontsize=8)
-    axes[0].legend()
+    axes[0].legend(loc="upper center", ncol=2, frameon=False, fontsize=8)
     axes[0].grid(axis="y", alpha=0.3)
 
     axes[1].bar(position - width / 2, [row["errors"] for row in dense], width, label="Baseline denso")
@@ -138,7 +140,9 @@ def plot_errors_by_class(rows: list[dict], path: Path) -> Path:
     axes[1].set_ylabel("numero de errores")
     axes[1].set_xticks(position)
     axes[1].set_xticklabels(names, rotation=45, ha="right", fontsize=8)
-    axes[1].legend()
+    maximo_errores = max([row["errors"] for row in dense] + [row["errors"] for row in cnn])
+    axes[1].set_ylim(0, maximo_errores * 1.32)
+    axes[1].legend(loc="upper center", ncol=2, frameon=False, fontsize=8)
     axes[1].grid(axis="y", alpha=0.3)
 
     figure.suptitle("Analisis de errores por clase")
@@ -160,7 +164,9 @@ def plot_budget_study(study: dict, baseline_f1: dict, path: Path, prescribed_epo
     axes[0].set_title("F1 macro de validacion por epoca")
     axes[0].set_xlabel("epoca")
     axes[0].set_ylabel("F1 macro (validacion)")
-    axes[0].legend()
+    # Las curvas suben de izquierda a derecha: la esquina inferior derecha queda
+    # libre y la leyenda no se cruza con ninguna serie.
+    axes[0].legend(loc="lower right", frameon=False, fontsize=8)
     axes[0].grid(alpha=0.3)
 
     names = ["dense", "cnn"]
@@ -175,7 +181,13 @@ def plot_budget_study(study: dict, baseline_f1: dict, path: Path, prescribed_epo
     axes[1].set_xticklabels([MODEL_TITLES[name] for name in names], fontsize=9)
     axes[1].set_ylabel("F1 macro (conjunto de prueba)")
     axes[1].set_title("Efecto del presupuesto de entrenamiento")
-    axes[1].legend(fontsize=8)
+    # Margen superior para que la leyenda no tape la barra de la CNN.
+    maximo_barras = max(
+        list(baseline_f1.values())
+        + [study["models"][name]["f1_macro_test"] for name in names]
+    )
+    axes[1].set_ylim(0, maximo_barras * 1.38)
+    axes[1].legend(loc="upper center", ncol=2, frameon=False, fontsize=8)
     axes[1].grid(axis="y", alpha=0.3)
 
     figure.suptitle("Estudio de presupuesto de entrenamiento")

@@ -398,11 +398,11 @@ def run_experiment(
     # Matrices de confusion (se conserva la del base y se anade la del denso).
     plot_confusion_matrix(
         y_test, predictions["cnn"], reports_dir / "confusion_cnn.png",
-        "Matriz de confusion - CNN (conjunto de prueba)",
+        "Matriz de confusión - CNN (conjunto de prueba)",
     )
     plot_confusion_matrix(
         y_test, predictions["dense"], reports_dir / "confusion_dense.png",
-        "Matriz de confusion - baseline denso (conjunto de prueba)",
+        "Matriz de confusión - baseline denso (conjunto de prueba)",
     )
 
     # Analisis de errores por clase.
