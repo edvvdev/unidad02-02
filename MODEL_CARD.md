@@ -144,13 +144,13 @@ distingue, la imagen es genuinamente ambigua. El detalle completo está en
 |---|---|---|
 | Parámetros entrenables | 50890 | 19466 |
 | Tamaño del modelo (`.keras`) | 619.12 KB | 262.17 KB |
-| Tiempo de entrenamiento (8 épocas) | 12.2 s | 68.9 s |
-| Tiempo de inferencia (mediana de 3) | 0.0512 ms/imagen | 0.0823 ms/imagen |
-| Mediciones de inferencia | 0.0512, 0.0446, 0.0622 ms/imagen | 0.0946, 0.0786, 0.0823 ms/imagen |
+| Tiempo de entrenamiento (8 épocas) | 11.1 s | 54.7 s |
+| Tiempo de inferencia (mediana de 3) | 0.0340 ms/imagen | 0.1005 ms/imagen |
+| Mediciones de inferencia | 0.0441, 0.0340, 0.0332 ms/imagen | 0.0913, 0.1005, 0.1117 ms/imagen |
 
 * **Estudio complementario de presupuesto** (misma partición y misma semilla,
   25 épocas): el denso alcanza F1 macro 0.8761 en
-  32.0 s y la CNN 0.8439 en 215.3 s. Es un
+  37.9 s y la CNN 0.8439 en 186.5 s. Es un
   experimento **complementario**: la comparación oficial del laboratorio sigue siendo
   la de 8 épocas y su resultado se reporta sin modificar.
 * **Alcance de la comparación.** El resultado es **compatible con una mejora de la
@@ -162,8 +162,8 @@ distingue, la imagen es genuinamente ambigua. El detalle completo está en
 * **Conclusión Green AI.** La CNN es más compacta (62 % menos parámetros y 58 % menos
   disco) pero, con este dataset, este presupuesto y esta arquitectura, **no aporta
   ninguna mejora predictiva**: el baseline denso gana en F1 macro
-  (0.8647 frente a 0.7892), entrena 5.6 veces más rápido e
-  infiere 1.6 veces más rápido. Una mejora que no existe no justifica el
+  (0.8647 frente a 0.7892), entrena 4.9 veces más rápido e
+  infiere 3.0 veces más rápido. Una mejora que no existe no justifica el
   coste adicional, de modo que **se entrega el baseline denso** y la CNN queda
   documentada para entornos con restricción de memoria.
 

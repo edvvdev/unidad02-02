@@ -149,13 +149,13 @@ semilla 42, CPU (sin GPU detectada), TensorFlow 2.21.0.
 | Accuracy | 0.8663 | 0.7930 | -0.0733 |
 | Parámetros entrenables | 50890 | 19466 | -31424 |
 | Tamaño del modelo (`.keras`) | 619.12 KB | 262.17 KB | -356.95 KB |
-| Tiempo de entrenamiento | 12.2 s | 68.9 s | +56.7 s |
-| Inferencia (mediana de 3) | 0.0512 ms/img | 0.0823 ms/img | +0.0311 ms/img |
+| Tiempo de entrenamiento | 11.1 s | 54.7 s | +43.5 s |
+| Inferencia (mediana de 3) | 0.0340 ms/img | 0.1005 ms/img | +0.0665 ms/img |
 | Épocas ejecutadas | 8 | 8 | — |
 
 Mediciones individuales de inferencia (ms por imagen):
-denso `0.0512, 0.0446, 0.0622` → mediana `0.0512`;
-CNN `0.0946, 0.0786, 0.0823` → mediana `0.0823`.
+denso `0.0441, 0.0340, 0.0332` → mediana `0.0340`;
+CNN `0.0913, 0.1005, 0.1117` → mediana `0.1005`.
 
 ### Lectura de las curvas
 
@@ -175,8 +175,8 @@ semilla (curvas por época calculadas sobre validación, nunca sobre prueba):
 
 | Modelo | F1 macro 8 ep. | F1 macro 25 ep. | Tiempo de entrenamiento 25 ep. |
 |---|---|---|---|
-| Baseline denso | 0.8647 | 0.8761 | 32.0 s |
-| CNN | 0.7892 | 0.8439 | 215.3 s |
+| Baseline denso | 0.8647 | 0.8761 | 37.9 s |
+| CNN | 0.7892 | 0.8439 | 186.5 s |
 
 El resultado es **compatible con una mejora de la arquitectura de la CNN al entrenar
 con más cómputo**, pero con **una sola semilla y sin intervalos de confianza** no
@@ -197,8 +197,8 @@ elegidos **al azar con semilla fija** en `reports/cnn_errors.png`.
 ### Decisión técnica
 
 Se entrega el ****baseline denso****. Con el presupuesto que fija el manual el baseline
-denso gana en F1 macro, entrena 5.6 veces más rápido e infiere
-1.6 veces más rápido; la **única** dimensión en la que gana la CNN es la
+denso gana en F1 macro, entrena 4.9 veces más rápido e infiere
+3.0 veces más rápido; la **única** dimensión en la que gana la CNN es la
 huella (19466 parámetros y 262.17 KB frente a 50890 y 619.12),
 de modo que la CNN es la opción preferente si la restricción dominante es la memoria
 o el tamaño del artefacto desplegado. El razonamiento completo, calculado a partir de

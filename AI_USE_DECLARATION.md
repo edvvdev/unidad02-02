@@ -68,7 +68,7 @@ determinaron el resultado:
 5. *"Si tardara más de 25 minutos, reduce a `--epochs 5` y decláralo en el README, el
    PDF y la Model Card (no inventes métricas de 8 épocas si no las ejecutaste)."*
    → No hizo falta reducir: en esta máquina (CPU, 20 núcleos) las 8 épocas tardan
-12.2 s (denso) y 68.9 s (CNN). Las cifras publicadas son las de
+11.1 s (denso) y 54.7 s (CNN). Las cifras publicadas son las de
    la ejecución real de 8 épocas.
 
 6. *"Elige errores al azar con semilla fija"* (apartado LAB07 del índice de la unidad).
