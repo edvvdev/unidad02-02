@@ -22,12 +22,12 @@
       "accuracy_test": 0.8766,
       "parameters": 50890,
       "model_size_kb": 619.11,
-      "train_seconds": 37.18,
-      "inference_ms_per_image": 0.036,
+      "train_seconds": 32.018,
+      "inference_ms_per_image": 0.0334,
       "inference_ms_per_image_runs": [
-        0.036,
-        0.0352,
-        0.0391
+        0.0361,
+        0.0309,
+        0.0334
       ],
       "epochs_completed": 25,
       "validation_f1_macro_per_epoch": [
@@ -173,12 +173,12 @@
       "accuracy_test": 0.8467,
       "parameters": 19466,
       "model_size_kb": 262.16,
-      "train_seconds": 177.441,
-      "inference_ms_per_image": 0.0638,
+      "train_seconds": 215.302,
+      "inference_ms_per_image": 0.0784,
       "inference_ms_per_image_runs": [
-        0.0649,
-        0.0638,
-        0.0629
+        0.075,
+        0.0824,
+        0.0784
       ],
       "epochs_completed": 25,
       "validation_f1_macro_per_epoch": [
