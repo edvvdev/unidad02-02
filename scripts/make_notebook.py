@@ -71,6 +71,7 @@ from inf8239_u02_cv.data import (
     normalize_images,
     split_train_validation,
 )
+from inf8239_u02_cv.diagnostico import diagnostico_curvas
 from inf8239_u02_cv.experiment import (
     run_budget_study,
     run_experiment,
@@ -307,22 +308,16 @@ manual se leen así:
     print()
 
 # Diagnostico del patron observado (los cuatro patrones del manual).
+# Se llama a la MISMA funcion que usan el generador del PDF y
+# scripts/verify_cifras.py: src/inf8239_u02_cv/diagnostico.py
 for nombre, titulo in (("dense", "Baseline denso"), ("cnn", "CNN")):
-    history = payload[nombre]["history"]
-    caida_entrenamiento = history["loss"][0] - history["loss"][-1]
-    caida_validacion = history["val_loss"][0] - history["val_loss"][-1]
-    sube_validacion = history["val_loss"][-1] > min(history["val_loss"])
-    if sube_validacion and caida_entrenamiento > 0:
-        patron = "sobreajuste: la perdida de entrenamiento baja y la de validacion deja de mejorar"
-    elif history["loss"][-1] > 0.6 or history["val_loss"][-1] > 0.6:
-        patron = ("subajuste: las perdidas siguen altas y la curva no se ha estabilizado "
-                  f"(perdida final de entrenamiento {history['loss'][-1]:.4f})")
-    else:
-        patron = "aprendizaje util: ambas perdidas disminuyen de forma sostenida"
-    print(f"{titulo}: {patron}")
-    print(f"    caida de la perdida de entrenamiento = {caida_entrenamiento:.4f} | "
-          f"caida de la de validacion = {caida_validacion:.4f} | "
-          f"epocas ejecutadas = {len(history['loss'])} de {EPOCHS}")"""
+    diagnostico = diagnostico_curvas(payload[nombre]["history"])
+    print(f"{titulo}: {diagnostico['patron']}")
+    print(f"    {diagnostico['frase']}")
+    print(f"    caida de la perdida de entrenamiento = {diagnostico['caida_entrenamiento']:.4f} | "
+          f"caida de la de validacion = {diagnostico['caida_validacion']:.4f} | "
+          f"accuracy de validacion final = {diagnostico['accuracy_validacion_final']:.4f} | "
+          f"epocas ejecutadas = {diagnostico['epocas']} de {EPOCHS}")"""
         ),
         MD(
             """## 3. Métricas globales: denso frente a CNN
@@ -635,7 +630,9 @@ else:
         f"este presupuesto, de modo que segun el principio Green AI del manual (mas accuracy no es "
         f"automaticamente mejor, y hay que justificar el coste) no se justifica su coste de "
         f"entrenamiento. Con {BUDGET_EPOCHS} epocas la CNN sube a {f1_cnn_25:.4f} y el denso a "
-        f"{f1_denso_25:.4f}: la diferencia es de presupuesto y de arquitectura, no de ruido."
+        f"{f1_denso_25:.4f}: el resultado es compatible con una mejora de la arquitectura de la CNN "
+        f"al entrenar con mas computo, pero con una sola semilla y sin intervalos de confianza no "
+        f"permite separar de forma concluyente el efecto del presupuesto del efecto de la arquitectura."
     )
 
 alternativo = (
